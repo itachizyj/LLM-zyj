@@ -123,7 +123,7 @@ class FeedForward(nn.Module):
         return self.dropout(self.w2(F.silu(self.w1(x)) * self.w3(x)))      # F.silu() 即为Swish 激活函数
 
 
-class ploractBlock(nn.Module):
+class LLMzyjBlock(nn.Module):
     def __init__(self, layer_id: int, config: LLMConfig):
         super().__init__()
         self.n_heads = config.n_heads
@@ -140,7 +140,7 @@ class ploractBlock(nn.Module):
         out = h + self.feed_forward(self.ffn_norm(h))                     # x 先 norm ,再经过 ffn ,然后得到 残差   （第二次残差连接）
         return out, past_kv
 
-class ploract(PreTrainedModel):
+class LLMzyj(PreTrainedModel):
     config_class = LLMConfig
     def __init__(self, params: LLMConfig = None):
         self.params = params or LLMConfig()  # 如果没有提供 params，则默认使用 LLMConfig() 创建一个默认配置。
@@ -148,7 +148,7 @@ class ploract(PreTrainedModel):
         self.vocab_size, self.n_layers = params.vocab_size, params.n_layers
         self.token_embedding = nn.Embedding(self.vocab_size, self.params.dim)
         self.dropout = nn.Dropout(params.dropout)
-        self.layers = nn.ModuleList([ploractBlock(l, params) for l in range(self.n_layers)]) # n_layers层
+        self.layers = nn.ModuleList([LLMzyjBlock(l, params) for l in range(self.n_layers)]) # n_layers层
         self.norm = RMSNorm(params.dim, eps = params.norm_eps)
         self.output = nn.Linear(self.params.dim, self.vocab_size, bias = False)
         self.token_embedding.weight = self.output.weight

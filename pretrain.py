@@ -8,7 +8,7 @@ import torch.optim as optim
 from contextlib import nullcontext
 from transformers import AutoTokenizer
 from torch.utils.data import DataLoader
-from model import ploract
+from model import LLMzyj
 from Config import LLMConfig
 from dataset import PretrainDataset
 
@@ -18,7 +18,7 @@ def get_lr(current_step, total_steps, lr):                                      
 
 def init_model(llm_config):
     tokenizer = AutoTokenizer.from_pretrained('./zyj_tokenizer')  # 加载分词器
-    model = ploract(llm_config).to(args.device)                         # 初始化模型并移动到GPU上
+    model = LLMzyj(llm_config).to(args.device)                         # 初始化模型并移动到GPU上
     print(f'LLM总参数量：{sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e6:.3f} 百万')  # 打印模型参数量
     return model, tokenizer
 
@@ -92,7 +92,7 @@ if __name__ == '__main__':    # 只有当前文件执行，才会执行，而不
                         default="cuda:0" if torch.cuda.is_available() else "cpu")   # 设备类型，支持cuda或cpu
     parser.add_argument("--use_wandb", type = bool, default = True)            # 是否使用wandb进行日志记录
     parser.add_argument("--dtype", type=str, default="bfloat16")       # 数据类型，默认使用bfloat16
-    parser.add_argument("--wandb_project", type=str, default="Ploract-Pretrain")  # wandb项目名称
+    parser.add_argument("--wandb_project", type=str, default="LLM-zyj-Pretrain")  # wandb项目名称
     parser.add_argument("--num_workers", type=int, default=1)          # 数据加载时的CPU数
     parser.add_argument("--accumulation_steps", type=int, default=2)   # 梯度累积步数，累积多少步更新一次，变相扩大了batch_size，更新梯度时，为batch_size * K个样本的梯度的均值
     parser.add_argument("--grad_clip", type=float, default=1.0)        # 梯度裁剪阈值，防止梯度过大，提高训练稳定性（超过1.0的直接设置为1.0）
@@ -113,7 +113,7 @@ if __name__ == '__main__':    # 只有当前文件执行，才会执行，而不
     device_type = args.device
 
     # 设置wandb运行名称
-    args.wandb_run_name = f"Ploract-Pretrain-Epoch-{args.epochs}-BatchSize-{args.batch_size}-LearningRate-{args.learning_rate}"
+    args.wandb_run_name = f"LLM-zyj-Pretrain-Epoch-{args.epochs}-BatchSize-{args.batch_size}-LearningRate-{args.learning_rate}"
 
     ctx = nullcontext() if device_type == "cpu" else torch.cuda.amp.autocast()   # torch.cuda.amp.autocast() torch自己封装的混合精度训练的编辑器
                                                                                  # 如果是CPU的话，就使用上下文编辑器，FP32

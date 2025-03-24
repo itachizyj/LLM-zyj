@@ -1,6 +1,6 @@
 from transformers import PretrainedConfig
 class LLMConfig(PretrainedConfig):
-    model_type = 'ploract'
+    model_type = 'LLM-zyj'
     #参数声明了类型，自动检测是否为int或float
     def __init__ (self,
                   dim: int = 512,

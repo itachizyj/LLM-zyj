@@ -1,19 +1,19 @@
 import math
 from Config import LLMConfig
-from model import ploract
+from model import LLMzyj
 import argparse
 import torch
 from transformers import AutoTokenizer
 
 def init_model(args):
-     tokenizer = AutoTokenizer.from_pretrained('./ploract_tokenizer')
+     tokenizer = AutoTokenizer.from_pretrained('./zyj_tokenizer')
      if args.model_mode == 0:
           ckp = './results/pretrain.pth'
      elif args.model_mode == 1:
           ckp = './results/SFT.pth'
      else:
           ckp = './results/distill.pth'
-     model = ploract(LLMConfig(max_seq_len = args.max_seq_len))
+     model = LLMzyj(LLMConfig(max_seq_len = args.max_seq_len))
      state_dict = torch.load(ckp, map_location = args.device)
      model.load_state_dict({k:v for k,v in state_dict.items() if 'mask' not in k}, strict = False)         # mask不需要保存在model中
      print(f'模型参数量: {sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e6:.2f}M(illion)')
